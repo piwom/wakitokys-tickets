@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAKITOKYS - Reservá tu entrada</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin-bottom: 16px;
+        }
+
+        .event-info {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+
+        .event-info p {
+            margin: 8px 0;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .event-info strong {
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #fff;
+        }
+
+        input::placeholder {
+            color: #666;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .ticket-container {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .ticket-container.active {
+            display: block;
+        }
+
+        #qrcode {
+            display: inline-block;
+            padding: 20px;
+            background: #fff;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+
+        .ticket-id {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #666;
+            margin-top: 16px;
+        }
+
+        .download-btn {
+            margin-top: 24px;
+            background: #fff;
+            color: #000;
+        }
+
+        .back-btn {
+            margin-top: 16px;
+            background: transparent;
+            color: #fff;
+            border: 2px solid #333;
+        }
+
+        .error {
+            background: #ff3333;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        .success-msg {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .success-msg h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .success-msg p {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>WAKITOKYS</h1>
+        </header>
+
+        <div class="error" id="error"></div>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Generando tu entrada...</p>
+        </div>
+
+        <!-- FORM DE REGISTRO -->
+        <form id="ticketForm">
+            <div class="event-info">
+                <p><strong>Evento:</strong> Presentación "¿A DÓNDE VA?"</p>
+                <p><strong>Fecha:</strong> 08 de Junio 2026 | 21hs</p>
+                <p><strong>Lugar:</strong> Tanque Cultural, CABA</p>
+                <p><strong>Entrada:</strong> GRATIS</p>
+            </div>
+
+            <div class="form-group">
+                <label for="nombre">Nombre completo *</label>
+                <input type="text" id="nombre" required placeholder="Juan Pérez">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" required placeholder="tu@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono *</label>
+                <input type="tel" id="telefono" required placeholder="11 1234-5678">
+            </div>
+
+            <div class="form-group">
+                <label for="cantidad">Cantidad de entradas (máx. 4) *</label>
+                <select id="cantidad" required>
+                    <option value="">Seleccioná cantidad</option>
+                    <option value="1">1 entrada</option>
+                    <option value="2">2 entradas</option>
+                    <option value="3">3 entradas</option>
+                    <option value="4">4 entradas</option>
+                </select>
+            </div>
+
+            <button type="submit" id="submitBtn">Reservar entrada</button>
+        </form>
+
+        <!-- TICKET CON QR -->
+        <div class="ticket-container" id="ticketContainer">
+            <div class="success-msg">
+                <h2>¡Entrada reservada!</h2>
+                <p>Guardá este QR para el día del show</p>
+            </div>
+
+            <div id="qrcode"></div>
+            
+            <div class="ticket-id">
+                <strong>WAKITOKYS - 08/06/2026</strong><br>
+                <span id="ticketInfo"></span><br>
+                ID: <span id="ticketId"></span>
+            </div>
+
+            <button class="download-btn" id="downloadBtn">Descargar QR</button>
+            <button class="back-btn" onclick="location.reload()">Reservar otra entrada</button>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN - REEMPLAZÁ CON TU URL DE GOOGLE APPS SCRIPT
+        const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbygfFMshyeRdEj6eS8S11Fhlfa6zPL1tf_PYair8KkHOVwqwAKutiZhyFu4F2gHxwG8/exec';
+
+        const form = document.getElementById('ticketForm');
+        const ticketContainer = document.getElementById('ticketContainer');
+        const errorDiv = document.getElementById('error');
+        const loadingDiv = document.getElementById('loading');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Generar ID único
+        function generateId() {
+            return 'WKT-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+
+        // Mostrar error
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.classList.add('active');
+            setTimeout(() => errorDiv.classList.remove('active'), 5000);
+        }
+
+        // Enviar datos a Google Sheets
+        async function saveToSheets(data) {
+            try {
+                const response = await fetch(SHEETS_API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                // Con no-cors no podemos leer la respuesta, asumimos éxito
+                return true;
+            } catch (error) {
+                console.error('Error guardando en Sheets:', error);
+                throw error;
+            }
+        }
+
+        // Manejar submit del form
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nombre = document.getElementById('nombre').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            const cantidad = document.getElementById('cantidad').value;
+
+            if (!nombre || !email || !telefono || !cantidad) {
+                showError('Por favor completá todos los campos');
+                return;
+            }
+
+            // Generar ID único para esta reserva
+            const ticketId = generateId();
+
+            // Mostrar loading
+            form.style.display = 'none';
+            loadingDiv.classList.add('active');
+
+            try {
+                // Guardar en Sheets
+                const ticketData = {
+                    id: ticketId,
+                    nombre: nombre,
+                    email: email,
+                    telefono: telefono,
+                    cantidad: cantidad,
+                    estado: 'pendiente',
+                    timestamp: new Date().toISOString()
+                };
+
+                await saveToSheets(ticketData);
+
+                // Generar QR
+                document.getElementById('qrcode').innerHTML = '';
+                new QRCode(document.getElementById('qrcode'), {
+                    text: ticketId,
+                    width: 200,
+                    height: 200,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+                // Mostrar info del ticket
+                document.getElementById('ticketInfo').textContent = `${nombre} - ${cantidad} ${cantidad === '1' ? 'entrada' : 'entradas'}`;
+                document.getElementById('ticketId').textContent = ticketId;
+
+                // Mostrar ticket
+                loadingDiv.classList.remove('active');
+                ticketContainer.classList.add('active');
+
+            } catch (error) {
+                loadingDiv.classList.remove('active');
+                form.style.display = 'block';
+                showError('Error al generar la entrada. Intentá de nuevo.');
+                console.error(error);
+            }
+        });
+
+        // Descargar QR
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            const ticketId = document.getElementById('ticketId').textContent;
+            
+            if (qrCanvas) {
+                const link = document.createElement('a');
+                link.download = `wakitokys-${ticketId}.png`;
+                link.href = qrCanvas.toDataURL();
+                link.click();
+            }
+        });
+    </script>
+</body>
+</html>

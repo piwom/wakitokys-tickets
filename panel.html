@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de ingreso - WAKITOKYS</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding: 20px 0;
+            border-bottom: 2px solid #333;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: #1a1a1a;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            border-bottom: 2px solid #333;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #666;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            color: #fff;
+            border-bottom-color: #fff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        #reader {
+            border: 2px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .search-box {
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #fff;
+        }
+
+        .result {
+            background: #1a1a1a;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .result.active {
+            display: block;
+        }
+
+        .result.success {
+            border: 2px solid #00ff00;
+        }
+
+        .result.error {
+            border: 2px solid #ff3333;
+        }
+
+        .result.warning {
+            border: 2px solid #ffaa00;
+        }
+
+        .result h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .result-info {
+            margin: 8px 0;
+            font-size: 15px;
+        }
+
+        .result-info strong {
+            color: #999;
+            display: inline-block;
+            width: 120px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 14px;
+            margin-top: 16px;
+            background: #fff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .action-btn.secondary {
+            background: transparent;
+            color: #fff;
+            border: 2px solid #333;
+        }
+
+        .ticket-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .ticket-item {
+            background: #1a1a1a;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ticket-item.usado {
+            opacity: 0.5;
+        }
+
+        .ticket-info-inline {
+            flex: 1;
+        }
+
+        .ticket-info-inline h4 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .ticket-info-inline p {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.pendiente {
+            background: #ffaa00;
+            color: #000;
+        }
+
+        .badge.usado {
+            background: #333;
+            color: #999;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-box {
+            background: #1a1a1a;
+            padding: 40px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .app {
+            display: none;
+        }
+
+        .app.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- PANTALLA DE LOGIN -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <h2>Panel de ingreso</h2>
+            <form id="loginForm">
+                <div class="search-box">
+                    <input type="password" class="search-input" id="passwordInput" placeholder="Contraseña" required>
+                </div>
+                <button type="submit" class="action-btn">Ingresar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div class="app" id="app">
+        <div class="container">
+            <header>
+                <h1>WAKITOKYS - Panel de ingreso</h1>
+                <p class="subtitle">08/06/2026 - Tanque Cultural</p>
+            </header>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="totalReservas">0</span>
+                    <span class="stat-label">Reservas</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="totalEntradas">0</span>
+                    <span class="stat-label">Entradas</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="totalIngresados">0</span>
+                    <span class="stat-label">Ingresados</span>
+                </div>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('scan')">Escanear QR</button>
+                <button class="tab" onclick="switchTab('search')">Buscar por nombre</button>
+                <button class="tab" onclick="switchTab('list')">Listado</button>
+            </div>
+
+            <!-- TAB: ESCANEAR QR -->
+            <div class="tab-content active" id="scanTab">
+                <div id="reader"></div>
+                <div class="result" id="scanResult"></div>
+            </div>
+
+            <!-- TAB: BUSCAR POR NOMBRE -->
+            <div class="tab-content" id="searchTab">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Escribí nombre o apellido...">
+                </div>
+                <div id="searchResults"></div>
+            </div>
+
+            <!-- TAB: LISTADO -->
+            <div class="tab-content" id="listTab">
+                <div class="ticket-list" id="ticketList">
+                    <div class="loading">Cargando entradas...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN
+        const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbygfFMshyeRdEj6eS8S11Fhlfa6zPL1tf_PYair8KkHOVwqwAKutiZhyFu4F2gHxwG8/exec';
+        const PASSWORD = 'wakitokys2026'; // Cambiá esto por tu contraseña
+
+        let tickets = [];
+        let html5QrCode;
+
+        // LOGIN
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('passwordInput').value;
+            if (password === PASSWORD) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('app').classList.add('active');
+                initApp();
+            } else {
+                alert('Contraseña incorrecta');
+            }
+        });
+
+        // INICIALIZAR APP
+        async function initApp() {
+            await loadTickets();
+            initScanner();
+            updateStats();
+        }
+
+        // CARGAR TICKETS DESDE SHEETS
+        async function loadTickets() {
+            try {
+                const response = await fetch(SHEETS_API_URL + '?action=getAll');
+                const data = await response.json();
+                tickets = data.tickets || [];
+                updateStats();
+                renderTicketList();
+            } catch (error) {
+                console.error('Error cargando tickets:', error);
+            }
+        }
+
+        // ACTUALIZAR ESTADÍSTICAS
+        function updateStats() {
+            const totalReservas = tickets.length;
+            const totalEntradas = tickets.reduce((sum, t) => sum + parseInt(t.cantidad), 0);
+            const totalIngresados = tickets.filter(t => t.estado === 'usado').length;
+
+            document.getElementById('totalReservas').textContent = totalReservas;
+            document.getElementById('totalEntradas').textContent = totalEntradas;
+            document.getElementById('totalIngresados').textContent = totalIngresados;
+        }
+
+        // INICIALIZAR ESCÁNER
+        function initScanner() {
+            html5QrCode = new Html5Qrcode("reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                onScanSuccess,
+                onScanError
+            ).catch(err => {
+                console.error("Error iniciando scanner:", err);
+            });
+        }
+
+        // CUANDO SE ESCANEA UN QR
+        function onScanSuccess(decodedText) {
+            html5QrCode.pause();
+            validateTicket(decodedText, true);
+        }
+
+        function onScanError(error) {
+            // Ignorar errores de escaneo continuo
+        }
+
+        // VALIDAR TICKET
+        async function validateTicket(ticketId, isScanned = false) {
+            const resultDiv = document.getElementById('scanResult');
+            const ticket = tickets.find(t => t.id === ticketId);
+
+            if (!ticket) {
+                showResult('error', 'Entrada no encontrada', 'Este código no corresponde a ninguna reserva.', isScanned);
+                return;
+            }
+
+            if (ticket.estado === 'usado') {
+                showResult('warning', 'Entrada ya usada', `
+                    <div class="result-info"><strong>Nombre:</strong> ${ticket.nombre}</div>
+                    <div class="result-info"><strong>Entradas:</strong> ${ticket.cantidad}</div>
+                    <div class="result-info"><strong>Esta entrada ya fue utilizada</strong></div>
+                `, isScanned);
+                return;
+            }
+
+            // Entrada válida
+            showResult('success', '✓ Entrada válida', `
+                <div class="result-info"><strong>Nombre:</strong> ${ticket.nombre}</div>
+                <div class="result-info"><strong>Entradas:</strong> ${ticket.cantidad}</div>
+                <div class="result-info"><strong>Email:</strong> ${ticket.email}</div>
+                <button class="action-btn" onclick="markAsUsed('${ticket.id}')">Marcar como usado</button>
+                <button class="action-btn secondary" onclick="continueScanning()">Continuar escaneando</button>
+            `, isScanned);
+        }
+
+        // MOSTRAR RESULTADO
+        function showResult(type, title, content, isScanned) {
+            const resultDiv = document.getElementById('scanResult');
+            resultDiv.className = `result active ${type}`;
+            resultDiv.innerHTML = `
+                <h3>${title}</h3>
+                ${content}
+            `;
+
+            if (type === 'error' || type === 'warning') {
+                setTimeout(() => {
+                    if (isScanned) continueScanning();
+                }, 3000);
+            }
+        }
+
+        // MARCAR COMO USADO
+        async function markAsUsed(ticketId) {
+            try {
+                await fetch(SHEETS_API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'markAsUsed',
+                        id: ticketId
+                    })
+                });
+
+                // Actualizar localmente
+                const ticket = tickets.find(t => t.id === ticketId);
+                if (ticket) ticket.estado = 'usado';
+
+                updateStats();
+                renderTicketList();
+                
+                document.getElementById('scanResult').innerHTML = `
+                    <h3>✓ Ingreso registrado</h3>
+                    <p>La entrada fue marcada como usada</p>
+                    <button class="action-btn" onclick="continueScanning()">Continuar escaneando</button>
+                `;
+
+            } catch (error) {
+                alert('Error al marcar la entrada. Intentá de nuevo.');
+                console.error(error);
+            }
+        }
+
+        // CONTINUAR ESCANEANDO
+        function continueScanning() {
+            document.getElementById('scanResult').classList.remove('active');
+            html5QrCode.resume();
+        }
+
+        // BÚSQUEDA POR NOMBRE
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const resultsDiv = document.getElementById('searchResults');
+
+            if (query.length < 2) {
+                resultsDiv.innerHTML = '';
+                return;
+            }
+
+            const results = tickets.filter(t => 
+                t.nombre.toLowerCase().includes(query)
+            );
+
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No se encontraron resultados</p>';
+                return;
+            }
+
+            resultsDiv.innerHTML = results.map(ticket => `
+                <div class="ticket-item">
+                    <div class="ticket-info-inline">
+                        <h4>${ticket.nombre}</h4>
+                        <p>${ticket.cantidad} entrada${ticket.cantidad > 1 ? 's' : ''} | ${ticket.email}</p>
+                    </div>
+                    <span class="badge ${ticket.estado}">${ticket.estado}</span>
+                </div>
+                ${ticket.estado === 'pendiente' ? `<button class="action-btn" onclick="markAsUsed('${ticket.id}')">Marcar como usado</button>` : ''}
+            `).join('');
+        });
+
+        // RENDERIZAR LISTADO
+        function renderTicketList() {
+            const listDiv = document.getElementById('ticketList');
+            
+            if (tickets.length === 0) {
+                listDiv.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">No hay reservas aún</p>';
+                return;
+            }
+
+            listDiv.innerHTML = tickets
+                .sort((a, b) => a.estado === 'usado' ? 1 : -1)
+                .map(ticket => `
+                    <div class="ticket-item ${ticket.estado}">
+                        <div class="ticket-info-inline">
+                            <h4>${ticket.nombre}</h4>
+                            <p>${ticket.cantidad} entrada${ticket.cantidad > 1 ? 's' : ''} | ${ticket.email} | ${ticket.telefono}</p>
+                        </div>
+                        <span class="badge ${ticket.estado}">${ticket.estado}</span>
+                    </div>
+                `).join('');
+        }
+
+        // CAMBIAR TAB
+        function switchTab(tabName) {
+            // Actualizar tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+
+            // Si cambiamos de tab, pausar el scanner
+            if (tabName !== 'scan' && html5QrCode) {
+                html5QrCode.pause();
+            } else if (tabName === 'scan' && html5QrCode) {
+                html5QrCode.resume();
+            }
+
+            // Si vamos al listado, recargar
+            if (tabName === 'list') {
+                loadTickets();
+            }
+        }
+
+        // Recargar tickets cada 30 segundos
+        setInterval(loadTickets, 30000);
+    </script>
+</body>
+</html>
