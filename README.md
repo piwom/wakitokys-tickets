@@ -17,7 +17,8 @@ Sistema de reserva de entradas con QR para el show de Wakitokys en Tanque Cultur
 - `index.html` - Form público de reserva
 - `panel.html` - Panel de ingreso para la puerta
 - `google-apps-script.js` - API en Google Apps Script
-- `public/` - Carpeta con logos (wkty-negro.png, logo-negro.png)
+- `wkty-negro.png` - Logo para el ticket
+- `logo-negro.png` - Logo completo
 
 ## 🚀 Setup paso a paso
 
@@ -72,8 +73,6 @@ git branch -M main
 git remote add origin https://github.com/TU_USUARIO/wakitokys-tickets.git
 git push -u origin main
 ```
-
-**IMPORTANTE:** Asegurate de subir la carpeta `public/` con los logos.
 
 ### 5. Deploy en Vercel
 
