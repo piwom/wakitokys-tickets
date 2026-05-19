@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WAKITOKYS · Reservá tu entrada</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -658,9 +659,9 @@
                     </div>
                 </div>
 
-                <!-- Botón descargar QR -->
+                <!-- Botón descargar ticket completo -->
                 <button class="btn-hard display" id="downloadBtn" style="margin-top: 22px;">
-                    Descargar QR ↓
+                    Descargar ticket ↓
                 </button>
 
                 <!-- Address -->
@@ -680,7 +681,7 @@
 
     <script>
         // CONFIGURACIÓN - REEMPLAZÁ CON TU URL DE GOOGLE APPS SCRIPT
-        const SHEETS_API_URL = 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI';
+        const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbygfFMshyeRdEj6eS8S11Fhlfa6zPL1tf_PYair8KkHOVwqwAKutiZhyFu4F2gHxwG8/exec';
 
         const formView = document.getElementById('formView');
         const successView = document.getElementById('successView');
@@ -809,16 +810,25 @@
             window.scrollTo(0, 0);
         });
 
-        // Download QR button
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            const qrCanvas = document.querySelector('#qrcode canvas');
+        // Download ticket button
+        document.getElementById('downloadBtn').addEventListener('click', async () => {
+            const ticketCard = document.querySelector('.ticket-card');
             const ticketId = document.getElementById('ticketCode').textContent.replace(/<br>/g, '');
             
-            if (qrCanvas) {
+            try {
+                const canvas = await html2canvas(ticketCard, {
+                    backgroundColor: '#F2EDE3',
+                    scale: 2, // Alta calidad
+                    logging: false
+                });
+                
                 const link = document.createElement('a');
-                link.download = `wakitokys-${ticketId}.png`;
-                link.href = qrCanvas.toDataURL('image/png');
+                link.download = `wakitokys-ticket-${ticketId}.png`;
+                link.href = canvas.toDataURL('image/png');
                 link.click();
+            } catch (error) {
+                console.error('Error al generar imagen:', error);
+                alert('Error al descargar el ticket. Intentá de nuevo.');
             }
         });
     </script>
