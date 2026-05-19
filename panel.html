@@ -3,9 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de ingreso - WAKITOKYS</title>
+    <title>WAKITOKYS · Panel de ingreso</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
     <style>
+        :root {
+            --ink: #0A0A0A;
+            --paper: #F2EDE3;
+            --paper-dim: #C9C3B6;
+            --line: rgba(242, 237, 227, 0.14);
+            --line-strong: rgba(242, 237, 227, 0.32);
+            --accent: #FF3D2E;
+            --ok: #B6FF3A;
+            --warn: #FFB23D;
+            --bad: #FF3D2E;
+            
+            --font-display: "Anton", "Impact", "Helvetica Neue Condensed", sans-serif;
+            --font-body: "Archivo", "Helvetica Neue", system-ui, sans-serif;
+            --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,86 +35,210 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #000;
-            color: #fff;
+            font-family: var(--font-body);
+            background: var(--ink);
+            color: var(--paper);
             min-height: 100vh;
-            padding: 20px;
+        }
+        
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: 0.07;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+            z-index: 1;
+        }
+
+        .display {
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+            line-height: 0.86;
+            font-weight: 400;
+        }
+
+        .mono {
+            font-family: var(--font-mono);
+            font-feature-settings: "tnum" 1;
+        }
+
+        /* Login */
+        .login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+            z-index: 2;
+        }
+
+        .login-box {
+            background: var(--ash);
+            border: 1.5px solid var(--line-strong);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            margin: 20px;
+        }
+
+        .login-box h2 {
+            font-family: var(--font-display);
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 32px;
+            line-height: 0.9;
+        }
+
+        .password-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 24px;
+        }
+
+        .password-field label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--paper-dim);
+        }
+
+        .password-field input {
+            background: transparent;
+            border: none;
+            border-bottom: 1.5px solid var(--line-strong);
+            color: var(--paper);
+            font-family: var(--font-body);
+            font-size: 18px;
+            padding: 10px 0 12px;
+            outline: none;
+        }
+
+        .password-field input:focus {
+            border-bottom-color: var(--accent);
+        }
+
+        .btn-hard {
+            display: block;
+            width: 100%;
+            background: var(--paper);
+            color: var(--ink);
+            border: none;
+            padding: 22px;
+            font-family: var(--font-display);
+            text-transform: uppercase;
+            font-size: 28px;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: background 90ms;
+        }
+
+        .btn-hard:hover {
+            background: var(--accent);
+        }
+
+        .btn-hard:active {
+            transform: translate(1px, 1px);
+        }
+
+        /* App */
+        .app {
+            display: none;
+            position: relative;
+            z-index: 2;
+        }
+
+        .app.active {
+            display: block;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         header {
-            text-align: center;
-            margin-bottom: 32px;
-            padding: 20px 0;
-            border-bottom: 2px solid #333;
+            border-bottom: 1.5px solid var(--line-strong);
+            padding-bottom: 20px;
+            margin-bottom: 28px;
         }
 
-        h1 {
-            font-size: 28px;
-            font-weight: 900;
+        .header-title {
+            font-size: clamp(32px, 6vw, 48px);
+            line-height: 0.86;
             margin-bottom: 8px;
         }
 
-        .subtitle {
-            color: #999;
-            font-size: 14px;
+        .header-subtitle {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--paper-dim);
         }
 
+        /* Stats */
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
-            margin-bottom: 32px;
+            margin-bottom: 28px;
         }
 
         .stat-card {
-            background: #1a1a1a;
+            background: var(--ash);
+            border: 1.5px solid var(--line);
             padding: 16px;
-            border-radius: 8px;
             text-align: center;
         }
 
         .stat-number {
-            font-size: 32px;
-            font-weight: 700;
+            font-family: var(--font-display);
+            font-size: 48px;
+            line-height: 1;
             display: block;
-            margin-bottom: 4px;
         }
 
         .stat-label {
-            font-size: 12px;
-            color: #999;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            letter-spacing: 0.18em;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: var(--paper-dim);
+            margin-top: 6px;
         }
 
+        /* Tabs */
         .tabs {
             display: flex;
-            gap: 12px;
+            gap: 2px;
             margin-bottom: 24px;
-            border-bottom: 2px solid #333;
+            border-bottom: 1.5px solid var(--line-strong);
         }
 
         .tab {
-            padding: 12px 24px;
+            padding: 14px 22px;
             background: transparent;
             border: none;
-            color: #666;
-            font-size: 15px;
-            font-weight: 600;
+            color: var(--paper-dim);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
             cursor: pointer;
             border-bottom: 3px solid transparent;
-            transition: all 0.2s;
+            transition: all 90ms;
         }
 
         .tab.active {
-            color: #fff;
-            border-bottom-color: #fff;
+            color: var(--paper);
+            border-bottom-color: var(--accent);
         }
 
         .tab-content {
@@ -103,36 +249,18 @@
             display: block;
         }
 
+        /* Scanner */
         #reader {
-            border: 2px solid #333;
-            border-radius: 12px;
+            border: 1.5px solid var(--line-strong);
             overflow: hidden;
             margin-bottom: 24px;
         }
 
-        .search-box {
-            margin-bottom: 24px;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 14px 16px;
-            background: #1a1a1a;
-            border: 2px solid #333;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 16px;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #fff;
-        }
-
+        /* Result card */
         .result {
-            background: #1a1a1a;
+            background: var(--ash);
+            border: 1.5px solid var(--line-strong);
             padding: 24px;
-            border-radius: 12px;
             margin-bottom: 16px;
             display: none;
         }
@@ -142,19 +270,32 @@
         }
 
         .result.success {
-            border: 2px solid #00ff00;
-        }
-
-        .result.error {
-            border: 2px solid #ff3333;
+            background: var(--ok);
+            color: var(--ink);
+            border-color: var(--ok);
         }
 
         .result.warning {
-            border: 2px solid #ffaa00;
+            border-color: var(--warn);
         }
 
-        .result h3 {
-            font-size: 20px;
+        .result.error {
+            border-color: var(--bad);
+        }
+
+        .result-header {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+
+        .result-title {
+            font-family: var(--font-display);
+            font-size: 56px;
+            line-height: 0.9;
             margin-bottom: 16px;
         }
 
@@ -164,48 +305,47 @@
         }
 
         .result-info strong {
-            color: #999;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
             display: inline-block;
-            width: 120px;
+            width: 100px;
+            opacity: 0.7;
         }
 
-        .action-btn {
+        /* Search */
+        .search-input {
             width: 100%;
-            padding: 14px;
-            margin-top: 16px;
-            background: #fff;
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .action-btn:active {
-            transform: translateY(0);
-        }
-
-        .action-btn.secondary {
+            padding: 14px 0;
             background: transparent;
-            color: #fff;
-            border: 2px solid #333;
+            border: none;
+            border-bottom: 1.5px solid var(--line-strong);
+            color: var(--paper);
+            font-family: var(--font-body);
+            font-size: 18px;
+            outline: none;
+            margin-bottom: 24px;
         }
 
+        .search-input:focus {
+            border-bottom-color: var(--accent);
+        }
+
+        .search-input::placeholder {
+            color: rgba(242, 237, 227, 0.35);
+        }
+
+        /* List */
         .ticket-list {
-            max-height: 500px;
+            max-height: 600px;
             overflow-y: auto;
         }
 
         .ticket-item {
-            background: #1a1a1a;
+            background: var(--ash);
+            border: 1.5px solid var(--line);
             padding: 16px;
-            border-radius: 8px;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
@@ -216,93 +356,105 @@
             opacity: 0.5;
         }
 
-        .ticket-info-inline {
-            flex: 1;
-        }
-
-        .ticket-info-inline h4 {
-            font-size: 16px;
+        .ticket-info h4 {
+            font-family: var(--font-display);
+            font-size: 20px;
+            text-transform: uppercase;
             margin-bottom: 4px;
+            line-height: 1;
         }
 
-        .ticket-info-inline p {
-            font-size: 13px;
-            color: #999;
+        .ticket-info p {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--paper-dim);
+            letter-spacing: 0.1em;
         }
 
         .badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 6px 14px;
+            font-family: var(--font-mono);
+            font-size: 10px;
             font-weight: 600;
             text-transform: uppercase;
+            letter-spacing: 0.14em;
         }
 
         .badge.pendiente {
-            background: #ffaa00;
-            color: #000;
+            background: var(--warn);
+            color: var(--ink);
         }
 
         .badge.usado {
-            background: #333;
-            color: #999;
+            background: transparent;
+            border: 1.5px solid var(--line-strong);
+            color: var(--paper-dim);
+        }
+
+        /* Buttons */
+        .action-btn {
+            width: 100%;
+            padding: 16px;
+            margin-top: 16px;
+            background: var(--paper);
+            color: var(--ink);
+            border: none;
+            font-family: var(--font-display);
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: background 90ms;
+        }
+
+        .action-btn:hover {
+            background: var(--accent);
+        }
+
+        .action-btn.secondary {
+            background: transparent;
+            color: var(--paper);
+            border: 1.5px solid var(--line-strong);
         }
 
         .loading {
             text-align: center;
             padding: 40px;
-            color: #999;
+            color: var(--paper-dim);
         }
 
-        .login-screen {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+        .hidden {
+            display: none !important;
         }
 
-        .login-box {
-            background: #1a1a1a;
-            padding: 40px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .login-box h2 {
-            text-align: center;
-            margin-bottom: 32px;
-        }
-
-        .app {
-            display: none;
-        }
-
-        .app.active {
-            display: block;
+        @keyframes scanline {
+            0%, 100% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
         }
     </style>
 </head>
 <body>
-    <!-- PANTALLA DE LOGIN -->
+    <!-- LOGIN -->
     <div class="login-screen" id="loginScreen">
         <div class="login-box">
-            <h2>Panel de ingreso</h2>
+            <h2 class="display">PANEL<br>DE<br>INGRESO</h2>
             <form id="loginForm">
-                <div class="search-box">
-                    <input type="password" class="search-input" id="passwordInput" placeholder="Contraseña" required>
+                <div class="password-field">
+                    <label>Contraseña</label>
+                    <input type="password" id="passwordInput" required autocomplete="off">
                 </div>
-                <button type="submit" class="action-btn">Ingresar</button>
+                <button type="submit" class="btn-hard">Ingresar</button>
             </form>
         </div>
     </div>
 
-    <!-- APP PRINCIPAL -->
+    <!-- APP -->
     <div class="app" id="app">
         <div class="container">
             <header>
-                <h1>WAKITOKYS - Panel de ingreso</h1>
-                <p class="subtitle">08/06/2026 - Tanque Cultural</p>
+                <h1 class="display header-title">WAKITOKYS<br>PANEL</h1>
+                <p class="mono header-subtitle">08/06/2026 · Tanque Cultural</p>
             </header>
 
             <div class="stats">
@@ -321,43 +473,40 @@
             </div>
 
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('scan')">Escanear QR</button>
-                <button class="tab" onclick="switchTab('search')">Buscar por nombre</button>
-                <button class="tab" onclick="switchTab('list')">Listado</button>
+                <button class="tab active" onclick="switchTab('scan', event)">Escanear QR</button>
+                <button class="tab" onclick="switchTab('search', event)">Buscar</button>
+                <button class="tab" onclick="switchTab('list', event)">Listado</button>
             </div>
 
-            <!-- TAB: ESCANEAR QR -->
+            <!-- TAB: SCAN -->
             <div class="tab-content active" id="scanTab">
                 <div id="reader"></div>
                 <div class="result" id="scanResult"></div>
             </div>
 
-            <!-- TAB: BUSCAR POR NOMBRE -->
+            <!-- TAB: SEARCH -->
             <div class="tab-content" id="searchTab">
-                <div class="search-box">
-                    <input type="text" class="search-input" id="searchInput" placeholder="Escribí nombre o apellido...">
-                </div>
+                <input type="text" class="search-input" id="searchInput" placeholder="Nombre o apellido...">
                 <div id="searchResults"></div>
             </div>
 
-            <!-- TAB: LISTADO -->
+            <!-- TAB: LIST -->
             <div class="tab-content" id="listTab">
                 <div class="ticket-list" id="ticketList">
-                    <div class="loading">Cargando entradas...</div>
+                    <div class="loading">Cargando...</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN
-        const SHEETS_API_URL = 'https://script.google.com/macros/s/AKfycbygfFMshyeRdEj6eS8S11Fhlfa6zPL1tf_PYair8KkHOVwqwAKutiZhyFu4F2gHxwG8/exec';
-        const PASSWORD = 'wakitokys2026'; // Cambiá esto por tu contraseña
+        const SHEETS_API_URL = 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI';
+        const PASSWORD = 'wakitokys2026';
 
         let tickets = [];
         let html5QrCode;
 
-        // LOGIN
+        // Login
         document.getElementById('loginForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const password = document.getElementById('passwordInput').value;
@@ -370,14 +519,12 @@
             }
         });
 
-        // INICIALIZAR APP
         async function initApp() {
             await loadTickets();
             initScanner();
             updateStats();
         }
 
-        // CARGAR TICKETS DESDE SHEETS
         async function loadTickets() {
             try {
                 const response = await fetch(SHEETS_API_URL + '?action=getAll');
@@ -386,103 +533,85 @@
                 updateStats();
                 renderTicketList();
             } catch (error) {
-                console.error('Error cargando tickets:', error);
+                console.error('Error:', error);
             }
         }
 
-        // ACTUALIZAR ESTADÍSTICAS
         function updateStats() {
-            const totalReservas = tickets.length;
-            const totalEntradas = tickets.reduce((sum, t) => sum + parseInt(t.cantidad), 0);
-            const totalIngresados = tickets.filter(t => t.estado === 'usado').length;
+            const total = tickets.length;
+            const entradas = tickets.reduce((sum, t) => sum + parseInt(t.cantidad), 0);
+            const ingresados = tickets.filter(t => t.estado === 'usado').length;
 
-            document.getElementById('totalReservas').textContent = totalReservas;
-            document.getElementById('totalEntradas').textContent = totalEntradas;
-            document.getElementById('totalIngresados').textContent = totalIngresados;
+            document.getElementById('totalReservas').textContent = total;
+            document.getElementById('totalEntradas').textContent = entradas;
+            document.getElementById('totalIngresados').textContent = ingresados;
         }
 
-        // INICIALIZAR ESCÁNER
         function initScanner() {
             html5QrCode = new Html5Qrcode("reader");
             html5QrCode.start(
                 { facingMode: "environment" },
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 onScanSuccess,
-                onScanError
-            ).catch(err => {
-                console.error("Error iniciando scanner:", err);
-            });
+                () => {}
+            ).catch(err => console.error(err));
         }
 
-        // CUANDO SE ESCANEA UN QR
         function onScanSuccess(decodedText) {
             html5QrCode.pause();
-            validateTicket(decodedText, true);
+            validateTicket(decodedText);
         }
 
-        function onScanError(error) {
-            // Ignorar errores de escaneo continuo
-        }
-
-        // VALIDAR TICKET
-        async function validateTicket(ticketId, isScanned = false) {
+        function validateTicket(ticketId) {
             const resultDiv = document.getElementById('scanResult');
             const ticket = tickets.find(t => t.id === ticketId);
 
             if (!ticket) {
-                showResult('error', 'Entrada no encontrada', 'Este código no corresponde a ninguna reserva.', isScanned);
+                resultDiv.className = 'result active error';
+                resultDiv.innerHTML = `
+                    <div class="result-header mono">Entrada no encontrada</div>
+                    <div class="result-title display">INVÁLIDO</div>
+                    <div class="result-info">Este código no existe en el sistema</div>
+                    <button class="action-btn secondary" onclick="continueScanning()">Continuar escaneando</button>
+                `;
+                setTimeout(continueScanning, 3000);
                 return;
             }
 
             if (ticket.estado === 'usado') {
-                showResult('warning', 'Entrada ya usada', `
+                resultDiv.className = 'result active warning';
+                resultDiv.innerHTML = `
+                    <div class="result-header mono">Ya fue usado</div>
+                    <div class="result-title display">YA INGRESÓ</div>
                     <div class="result-info"><strong>Nombre:</strong> ${ticket.nombre}</div>
                     <div class="result-info"><strong>Entradas:</strong> ${ticket.cantidad}</div>
-                    <div class="result-info"><strong>Esta entrada ya fue utilizada</strong></div>
-                `, isScanned);
+                    <button class="action-btn secondary" onclick="continueScanning()">Continuar escaneando</button>
+                `;
+                setTimeout(continueScanning, 3000);
                 return;
             }
 
-            // Entrada válida
-            showResult('success', '✓ Entrada válida', `
-                <div class="result-info"><strong>Nombre:</strong> ${ticket.nombre}</div>
-                <div class="result-info"><strong>Entradas:</strong> ${ticket.cantidad}</div>
-                <div class="result-info"><strong>Email:</strong> ${ticket.email}</div>
-                <button class="action-btn" onclick="markAsUsed('${ticket.id}')">Marcar como usado</button>
-                <button class="action-btn secondary" onclick="continueScanning()">Continuar escaneando</button>
-            `, isScanned);
-        }
-
-        // MOSTRAR RESULTADO
-        function showResult(type, title, content, isScanned) {
-            const resultDiv = document.getElementById('scanResult');
-            resultDiv.className = `result active ${type}`;
+            resultDiv.className = 'result active success';
             resultDiv.innerHTML = `
-                <h3>${title}</h3>
-                ${content}
+                <div class="result-header mono">✓ Entrada válida</div>
+                <div class="result-title display">ADMITIDO</div>
+                <div class="result-info"><strong>Nombre:</strong> ${ticket.nombre}</div>
+                <div class="result-info"><strong>Email:</strong> ${ticket.email}</div>
+                <div class="result-info"><strong>Entradas:</strong> ${ticket.cantidad}</div>
+                <button class="action-btn" onclick="markAsUsed('${ticket.id}')">Marcar como usado</button>
+                <button class="action-btn secondary" onclick="continueScanning()">Cancelar</button>
             `;
-
-            if (type === 'error' || type === 'warning') {
-                setTimeout(() => {
-                    if (isScanned) continueScanning();
-                }, 3000);
-            }
         }
 
-        // MARCAR COMO USADO
         async function markAsUsed(ticketId) {
             try {
                 await fetch(SHEETS_API_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'markAsUsed',
-                        id: ticketId
-                    })
+                    body: JSON.stringify({ action: 'markAsUsed', id: ticketId })
                 });
 
-                // Actualizar localmente
                 const ticket = tickets.find(t => t.id === ticketId);
                 if (ticket) ticket.estado = 'usado';
 
@@ -490,24 +619,21 @@
                 renderTicketList();
                 
                 document.getElementById('scanResult').innerHTML = `
-                    <h3>✓ Ingreso registrado</h3>
-                    <p>La entrada fue marcada como usada</p>
+                    <div class="result-header mono">✓ Registrado</div>
+                    <div class="result-title display" style="color: var(--ok);">INGRESO<br>OK</div>
                     <button class="action-btn" onclick="continueScanning()">Continuar escaneando</button>
                 `;
-
             } catch (error) {
-                alert('Error al marcar la entrada. Intentá de nuevo.');
-                console.error(error);
+                alert('Error al marcar. Intentá de nuevo.');
             }
         }
 
-        // CONTINUAR ESCANEANDO
         function continueScanning() {
             document.getElementById('scanResult').classList.remove('active');
-            html5QrCode.resume();
+            if (html5QrCode) html5QrCode.resume();
         }
 
-        // BÚSQUEDA POR NOMBRE
+        // Search
         document.getElementById('searchInput').addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
             const resultsDiv = document.getElementById('searchResults');
@@ -522,15 +648,15 @@
             );
 
             if (results.length === 0) {
-                resultsDiv.innerHTML = '<p style="text-align:center;color:#999;padding:20px;">No se encontraron resultados</p>';
+                resultsDiv.innerHTML = '<p class="loading">No se encontraron resultados</p>';
                 return;
             }
 
             resultsDiv.innerHTML = results.map(ticket => `
-                <div class="ticket-item">
-                    <div class="ticket-info-inline">
+                <div class="ticket-item ${ticket.estado}">
+                    <div class="ticket-info">
                         <h4>${ticket.nombre}</h4>
-                        <p>${ticket.cantidad} entrada${ticket.cantidad > 1 ? 's' : ''} | ${ticket.email}</p>
+                        <p>${ticket.cantidad} entrada${ticket.cantidad > 1 ? 's' : ''} · ${ticket.email}</p>
                     </div>
                     <span class="badge ${ticket.estado}">${ticket.estado}</span>
                 </div>
@@ -538,12 +664,12 @@
             `).join('');
         });
 
-        // RENDERIZAR LISTADO
+        // List
         function renderTicketList() {
             const listDiv = document.getElementById('ticketList');
             
             if (tickets.length === 0) {
-                listDiv.innerHTML = '<p style="text-align:center;color:#999;padding:40px;">No hay reservas aún</p>';
+                listDiv.innerHTML = '<p class="loading">No hay reservas</p>';
                 return;
             }
 
@@ -551,38 +677,32 @@
                 .sort((a, b) => a.estado === 'usado' ? 1 : -1)
                 .map(ticket => `
                     <div class="ticket-item ${ticket.estado}">
-                        <div class="ticket-info-inline">
+                        <div class="ticket-info">
                             <h4>${ticket.nombre}</h4>
-                            <p>${ticket.cantidad} entrada${ticket.cantidad > 1 ? 's' : ''} | ${ticket.email} | ${ticket.telefono}</p>
+                            <p>${ticket.cantidad} entrada${ticket.cantidad > 1 ? 's' : ''} · ${ticket.email}</p>
                         </div>
                         <span class="badge ${ticket.estado}">${ticket.estado}</span>
                     </div>
                 `).join('');
         }
 
-        // CAMBIAR TAB
-        function switchTab(tabName) {
-            // Actualizar tabs
+        // Tabs
+        function switchTab(tabName, event) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
             event.target.classList.add('active');
             document.getElementById(tabName + 'Tab').classList.add('active');
 
-            // Si cambiamos de tab, pausar el scanner
             if (tabName !== 'scan' && html5QrCode) {
                 html5QrCode.pause();
             } else if (tabName === 'scan' && html5QrCode) {
                 html5QrCode.resume();
             }
 
-            // Si vamos al listado, recargar
-            if (tabName === 'list') {
-                loadTickets();
-            }
+            if (tabName === 'list') loadTickets();
         }
 
-        // Recargar tickets cada 30 segundos
         setInterval(loadTickets, 30000);
     </script>
 </body>

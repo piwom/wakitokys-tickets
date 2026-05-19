@@ -617,7 +617,7 @@
                     <div class="ticket-header">
                         <div>
                             <div class="ticket-title-small">ADMIT ONE</div>
-                            <div class="display ticket-title-main">WAKITOKYS</div>
+                            <img src="public/wkty-negro.png" alt="WAKITOKYS" style="height: 28px; display: block; margin-top: 6px;">
                             <div class="ticket-subtitle">¿A DÓNDE VA? · presentación</div>
                         </div>
                         <div class="ticket-id mono" id="ticketNumber">#0000</div>
@@ -657,6 +657,11 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Botón descargar QR -->
+                <button class="btn-hard display" id="downloadBtn" style="margin-top: 22px;">
+                    Descargar QR ↓
+                </button>
 
                 <!-- Address -->
                 <div class="address-card">
@@ -802,6 +807,19 @@
             quantity = 1;
             document.getElementById('qtyDisplay').textContent = '01';
             window.scrollTo(0, 0);
+        });
+
+        // Download QR button
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const qrCanvas = document.querySelector('#qrcode canvas');
+            const ticketId = document.getElementById('ticketCode').textContent.replace(/<br>/g, '');
+            
+            if (qrCanvas) {
+                const link = document.createElement('a');
+                link.download = `wakitokys-${ticketId}.png`;
+                link.href = qrCanvas.toDataURL('image/png');
+                link.click();
+            }
         });
     </script>
 </body>
