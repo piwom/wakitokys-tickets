@@ -1,5 +1,5 @@
 // GOOGLE APPS SCRIPT - Pegá este código en tu proyecto de Google Apps Script
-// Este script funciona como API REST para guardar y leer datos de Google Sheets
+// Envío de emails con GmailApp (100% gratis, 100 emails/día)
 
 function doPost(e) {
   try {
@@ -16,7 +16,6 @@ function doPost(e) {
       data.id,
       data.nombre,
       data.email,
-      data.telefono,
       data.cantidad,
       data.estado,
       data.timestamp,
@@ -24,6 +23,13 @@ function doPost(e) {
     ];
     
     sheet.appendRow(row);
+    
+    // Enviar email
+    try {
+      sendTicketEmail(data.email, data.nombre, data.id, data.cantidad);
+    } catch (emailError) {
+      Logger.log('Error enviando email: ' + emailError);
+    }
     
     return ContentService.createTextOutput(JSON.stringify({
       success: true,
@@ -43,16 +49,14 @@ function doGet(e) {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Tickets');
     const data = sheet.getDataRange().getValues();
     
-    // Saltar header row
     const tickets = data.slice(1).map(row => ({
       id: row[0],
       nombre: row[1],
       email: row[2],
-      telefono: row[3],
-      cantidad: row[4],
-      estado: row[5],
-      timestamp: row[6],
-      timestampUso: row[7]
+      cantidad: row[3],
+      estado: row[4],
+      timestamp: row[5],
+      timestampUso: row[6]
     }));
     
     return ContentService.createTextOutput(JSON.stringify({
@@ -73,8 +77,8 @@ function markTicketAsUsed(sheet, ticketId) {
   
   for (let i = 1; i < data.length; i++) {
     if (data[i][0] === ticketId) {
-      sheet.getRange(i + 1, 6).setValue('usado'); // columna estado
-      sheet.getRange(i + 1, 8).setValue(new Date().toISOString()); // timestamp de uso
+      sheet.getRange(i + 1, 5).setValue('usado');
+      sheet.getRange(i + 1, 7).setValue(new Date().toISOString());
       
       return ContentService.createTextOutput(JSON.stringify({
         success: true,
@@ -87,4 +91,53 @@ function markTicketAsUsed(sheet, ticketId) {
     success: false,
     error: 'Ticket no encontrado'
   })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function sendTicketEmail(toEmail, toName, ticketId, quantity) {
+  const shortId = ticketId.split('-')[1].substring(0, 4);
+  
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h1 style="font-size: 32px; font-weight: bold; margin-bottom: 20px;">¡NOS VEMOS AHÍ!</h1>
+      
+      <p style="font-size: 16px; margin-bottom: 10px;">Hola <strong>${toName}</strong>,</p>
+      
+      <p style="font-size: 16px; margin-bottom: 20px;">
+        Tu reserva está confirmada. Guardá este email o descargá el ticket desde tu navegador.
+      </p>
+      
+      <div style="background: #F2EDE3; padding: 20px; margin: 20px 0; border: 2px solid #0A0A0A;">
+        <p style="margin: 0; font-size: 12px; text-transform: uppercase; opacity: 0.6;">EVENTO</p>
+        <h2 style="margin: 5px 0; font-size: 24px;">WAKITOKYS - ¿A DÓNDE VA?</h2>
+        
+        <p style="margin: 15px 0 5px 0;"><strong>📅 Fecha:</strong> Domingo 08 de Julio 2026 - 21hs</p>
+        <p style="margin: 5px 0;"><strong>📍 Lugar:</strong> Tanque Cultural - Acassuso 6930, CABA</p>
+        <p style="margin: 5px 0;"><strong>🎟️ Entradas:</strong> ${quantity}</p>
+        <p style="margin: 5px 0;"><strong>🆔 Código:</strong> ${shortId}</p>
+      </div>
+      
+      <p style="font-size: 14px; margin: 20px 0;">
+        <strong>En la puerta:</strong><br>
+        • Mostrá este email o el QR que descargaste<br>
+        • Si no lo tenés, decinos tu nombre y apellido
+      </p>
+      
+      <p style="font-size: 12px; color: #666; margin-top: 30px;">
+        Nos vemos el 08/07 🎵
+      </p>
+    </div>
+  `;
+  
+  // Enviar con GmailApp (usa tu cuenta de Google)
+  GmailApp.sendEmail(
+    toEmail,
+    '✓ Tu entrada para WAKITOKYS - 08/07',
+    'Tu reserva está confirmada. Abrí este email en un navegador para ver los detalles.',
+    {
+      htmlBody: emailHtml,
+      name: 'WAKITOKYS'
+    }
+  );
+  
+  Logger.log('Email enviado a: ' + toEmail);
 }
